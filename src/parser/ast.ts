@@ -31,6 +31,10 @@ function parseString(reader: Reader): string {
   throw new Error("Error parsing string")
 }
 
+function parseComment(reader: Reader) {
+  while (reader.hasTokens() && reader.next() !== "\n") {}
+}
+
 export function parseASTElement(reader: Reader): ASTNode {
   const children: ASTNode[] = []
   let nextToken = null
@@ -38,7 +42,9 @@ export function parseASTElement(reader: Reader): ASTNode {
   const openPosition = reader.position()
   while (reader.hasTokens()) {
     nextToken = reader.peek()
-    if (isWhitespace(nextToken)) {
+    if (nextToken === "/" && reader.peekAfter() === "/") {
+      parseComment(reader)
+    } else if (isWhitespace(nextToken)) {
       reader.next()
     } else if (nextToken === "(") {
       reader.next()
