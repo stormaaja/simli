@@ -7,5 +7,5 @@ interface LineError {
 
 export interface Environment {
   symbols: { [key: string]: ASTNode }
-  errors: PositionRange[]
+  errors: LineError[]
 }
