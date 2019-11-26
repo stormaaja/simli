@@ -17,13 +17,13 @@ function parseSymbol(reader: Reader): string {
 }
 
 function parseString(reader: Reader): string {
-  let str = ""
+  let str = reader.next()
   while (reader.hasTokens()) {
     const token = reader.next()
     if (token === "\\") {
       str += reader.next()
     } else if (token === '"') {
-      return str
+      return str + token
     } else {
       str += token
     }
