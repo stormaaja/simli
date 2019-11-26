@@ -1,5 +1,5 @@
 import { Environment } from "./ast/environment"
-import { SystemFunctionNode } from "./ast/function_node"
+import { SystemFunctionNode, FunctionNode } from "./ast/function_node"
 import { ASTNode } from "./ast/ast_node"
 
 export function addSystemFunctions(env: Environment) {
@@ -51,6 +51,12 @@ export function addSystemFunctions(env: Environment) {
     (env: Environment, args: ASTNode[]) => {
       env.symbols[args[0].toString()] = args[1]
       return null
+    }
+  )
+  env.symbols.fn = new SystemFunctionNode(
+    "fn",
+    (env: Environment, args: ASTNode[]) => {
+      return new FunctionNode(args, env.location)
     }
   )
 }
