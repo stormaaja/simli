@@ -31,3 +31,22 @@ export class SystemFunctionNode extends ASTNode {
     return this.fn(env, args)
   }
 }
+
+export class FunctionNode extends ASTNode {
+  args: ASTNode[]
+
+  constructor(children: ASTNode[], location: PositionRange) {
+    super("function", children, location)
+    this.args = children[1].children
+  }
+
+  eval(env: Environment, args: ASTNode[] = []): ASTNode | null {
+    const symbols = Object.assign({}, env.symbols)
+    args.forEach((a, i) => {
+      env.symbols[this.args[i].toString()] = a
+    })
+    const values = this.children.map(c => c.eval(env))
+    env.symbols = symbols
+    return values[values.length - 1]
+  }
+}
