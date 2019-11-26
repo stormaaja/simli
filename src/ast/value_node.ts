@@ -1,6 +1,7 @@
 import { ASTNode } from "./ast_node"
 import { PositionRange } from "./position"
 import { Reader } from "../parser/reader"
+import { Environment } from "./environment"
 
 export class ValueNode extends ASTNode {
   value: string
@@ -23,6 +24,14 @@ export class ValueNode extends ASTNode {
         return parseFloat(this.value)
       default:
         throw new Error(`Unknown type ${this.type} with value ${this.value}`)
+    }
+  }
+
+  eval(env: Environment, args: ASTNode[] = []): ASTNode | null {
+    if (this.type === "symbol") {
+      return env.symbols[this.value].eval(env, args)
+    } else {
+      return this
     }
   }
 }

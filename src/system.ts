@@ -26,7 +26,14 @@ export function addSystemFunctions(env: Environment) {
               (env: Environment, args: ASTNode[]) => {
                 importNs[k].apply(
                   null,
-                  args.map(a => a.getTypedValue())
+                  args.map(a => {
+                    const value = a.eval(env, args)
+                    if (value) {
+                      return value.getTypedValue()
+                    } else {
+                      return null
+                    }
+                  })
                 )
 
                 return null
