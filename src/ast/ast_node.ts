@@ -16,4 +16,8 @@ export class ASTNode {
     const results = this.children.map(c => c.eval(env, args))
     return results[results.length - 1]
   }
+
+  getTypedValue(): string | number {
+    throw new Error(`Casting not supported for ${this.type} node`)
+  }
 }
