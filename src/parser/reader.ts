@@ -21,6 +21,10 @@ export class Reader {
     return this.content.charAt(this.i)
   }
 
+  peekAfter() {
+    return this.content.charAt(this.i + 1)
+  }
+
   next() {
     if (this.peek() === "\n") {
       this.line++
