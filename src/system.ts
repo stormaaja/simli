@@ -39,4 +39,11 @@ export function addSystemFunctions(env: Environment) {
       return null
     }
   )
+  env.symbols.def = new SystemFunctionNode(
+    "def",
+    (env: Environment, args: ASTNode[]) => {
+      env.symbols[args[0].toString()] = args[1]
+      return null
+    }
+  )
 }
