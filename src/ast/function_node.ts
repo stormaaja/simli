@@ -16,14 +16,17 @@ export class FNCallNode extends ASTNode {
 }
 
 export class SystemFunctionNode extends ASTNode {
-  fn: (args: ASTNode[]) => ASTNode | null
+  fn: (env: Environment, args: ASTNode[]) => ASTNode | null
 
-  constructor(id: string, fn: (args: ASTNode[]) => ASTNode | null) {
+  constructor(
+    id: string,
+    fn: (env: Environment, args: ASTNode[]) => ASTNode | null
+  ) {
     super("function", [], {})
     this.fn = fn
   }
 
   eval(env: Environment, args: ASTNode[]): ASTNode | null {
-    return this.fn(args)
+    return this.fn(env, args)
   }
 }
