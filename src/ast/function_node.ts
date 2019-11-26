@@ -11,6 +11,7 @@ export class FNCallNode extends ASTNode {
   }
 
   eval(env: Environment, args: ASTNode[] = []): ASTNode | null {
+    env.location = this.location
     return env.symbols[this.id].eval(env, this.children)
   }
 }
