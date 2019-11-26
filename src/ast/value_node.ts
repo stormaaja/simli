@@ -27,6 +27,29 @@ export class ValueNode extends ASTNode {
   }
 }
 
+const rInteger = /^\d+$/
+const rFloat = /^\d+\.\d+$/
+
+function isInteger(s: string) {
+  return s.match(rInteger) !== null
+}
+
+function isFloat(s: string) {
+  return s.match(rFloat) !== null
+}
+
+function getType(s: string) {
+  if (s.startsWith('"')) {
+    return "constString"
+  } else if (isInteger(s)) {
+    return "constInteger"
+  } else if (isFloat(s)) {
+    return "constFloat"
+  } else {
+    return "symbol"
+  }
+}
+
 export function createValueNode(
   fn: (reader: Reader) => string,
   reader: Reader
