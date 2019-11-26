@@ -57,10 +57,9 @@ export function parseASTElement(reader: Reader): ASTNode {
         end: reader.position()
       })
     } else if (nextToken === `"`) {
-      reader.next()
-      children.push(createValueNode("constString", parseString, reader))
+      children.push(createValueNode(parseString, reader))
     } else {
-      children.push(createValueNode("symbol", parseSymbol, reader))
+      children.push(createValueNode(parseSymbol, reader))
     }
   }
   if (open) {
