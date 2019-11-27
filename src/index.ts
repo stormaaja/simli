@@ -20,7 +20,8 @@ function main(args: string[]) {
       if (args.indexOf("--eval") > -1) {
         const env: Environment = {
           errors: [],
-          symbols: {}
+          symbols: {},
+          location: {}
         }
         addSystemFunctions(env)
         ast.eval(env)
