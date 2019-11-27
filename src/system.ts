@@ -2,10 +2,16 @@ import { Environment } from "./ast/environment"
 import { SystemFunctionNode, FunctionNode } from "./ast/function_node"
 import { ASTNode } from "./ast/ast_node"
 import { parseFile } from "."
+import { PositionRange } from "./ast/position"
+import { ValueNode } from "./ast/value_node"
+
+function createSymbol(id: string, position?: PositionRange) {
+  return new ValueNode("symbol", id, position || {})
+}
 
 export function addSystemFunctions(env: Environment) {
   env.symbols.import = new SystemFunctionNode(
-    "import",
+    [createSymbol("ns"), createSymbol("alias")],
     (env: Environment, args: ASTNode[]) => {
       const ns = args[0].toString().split("/")
       const alias = args[1].toString()
@@ -23,7 +29,7 @@ export function addSystemFunctions(env: Environment) {
         fnKeys.forEach(
           k =>
             (env.symbols[`${alias}/${k}`] = new SystemFunctionNode(
-              k,
+              [createSymbol(k)],
               (env: Environment, args: ASTNode[]) => {
                 importNs[k].apply(
                   null,
@@ -49,14 +55,14 @@ export function addSystemFunctions(env: Environment) {
     }
   )
   env.symbols.def = new SystemFunctionNode(
-    "def",
+    [createSymbol("symbol"), createSymbol("value")],
     (env: Environment, args: ASTNode[]) => {
       env.symbols[args[0].toString()] = args[1]
       return null
     }
   )
   env.symbols.fn = new SystemFunctionNode(
-    "fn",
+    [createSymbol("symvol"), createSymbol("args"), createSymbol("body")],
     (env: Environment, args: ASTNode[]) => {
       return new FunctionNode(args, env.location)
     }

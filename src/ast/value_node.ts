@@ -1,7 +1,7 @@
 import { ASTNode } from "./ast_node"
 import { PositionRange } from "./position"
 import { Reader } from "../parser/reader"
-import { Environment } from "./environment"
+import { Environment, createError } from "./environment"
 
 export class ValueNode extends ASTNode {
   value: string
@@ -33,6 +33,19 @@ export class ValueNode extends ASTNode {
     } else {
       return this
     }
+  }
+
+  check(env: Environment, args: ASTNode[] = []): ASTNode {
+    if (this.type === "symbol") {
+      if (env.symbols[this.value]) {
+        return env.symbols[this.value].check(env, args)
+      } else {
+        env.errors.push(
+          createError(this, "symbolValueNotFound", `Symbol: ${this.value}`)
+        )
+      }
+    }
+    return this
   }
 }
 
@@ -67,5 +80,6 @@ export function createValueNode(
   const value = fn(reader)
   const end = reader.position()
   const type = getType(value)
-  return new ValueNode(type, value, { start, end })
+  const file = reader.file
+  return new ValueNode(type, value, { start, end, file })
 }

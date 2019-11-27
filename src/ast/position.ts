@@ -6,4 +6,5 @@ export interface Position {
 export interface PositionRange {
   start?: Position
   end?: Position
+  file?: string
 }

@@ -1,6 +1,6 @@
 import { ASTNode } from "./ast_node"
 import { PositionRange } from "./position"
-import { Environment } from "./environment"
+import { Environment, createError } from "./environment"
 
 export class FNCallNode extends ASTNode {
   id: string
@@ -14,21 +14,45 @@ export class FNCallNode extends ASTNode {
     env.location = this.location
     return env.symbols[this.id].eval(env, this.children)
   }
+
+  check(env: Environment, args: ASTNode[] = []): ASTNode {
+    this.children.slice(1).map(c => c.check(env, args))
+    if (env.symbols[this.id]) {
+      const node = env.symbols[this.id].check(env, args)
+      const fnArgs = node.children[0].children
+      if (this.children.length !== fnArgs.length) {
+        env.errors.push(
+          createError(
+            this,
+            "wrongNumberArguments",
+            `${this.id}: ${this.children.length} arguments given but ${fnArgs.length}`
+          )
+        )
+      }
+    } else {
+      env.errors.push(createError(this, "functionNotFound"))
+    }
+    return this
+  }
 }
 
 export class SystemFunctionNode extends ASTNode {
   fn: (env: Environment, args: ASTNode[]) => ASTNode | null
 
   constructor(
-    id: string,
+    args: ASTNode[],
     fn: (env: Environment, args: ASTNode[]) => ASTNode | null
   ) {
-    super("function", [], {})
+    super("function", args, {})
     this.fn = fn
   }
 
   eval(env: Environment, args: ASTNode[]): ASTNode | null {
     return this.fn(env, args)
+  }
+
+  check(env: Environment, args: ASTNode[] = []): ASTNode {
+    return this
   }
 }
 
@@ -48,5 +72,15 @@ export class FunctionNode extends ASTNode {
     const values = this.children.map(c => c.eval(env))
     env.symbols = symbols
     return values[values.length - 1]
+  }
+
+  check(env: Environment, args: ASTNode[] = []): ASTNode {
+    const symbols = Object.assign({}, env.symbols)
+    args.forEach((a, i) => {
+      env.symbols[this.args[i].toString()] = a
+    })
+    const results = this.children.slice(1).map(c => c.check(env, args))
+    env.symbols = symbols
+    return results[results.length - 1]
   }
 }

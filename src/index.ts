@@ -17,14 +17,41 @@ function main(args: string[]) {
       if (args.indexOf("--debug") > -1) {
         console.log(JSON.stringify(ast, null, 2))
       }
-      if (args.indexOf("--eval") > -1) {
-        const env: Environment = {
-          errors: [],
-          symbols: {},
-          location: {}
+      const checkEnv: Environment = {
+        errors: [],
+        symbols: {},
+        location: {}
+      }
+      addSystemFunctions(checkEnv)
+      ast.check(checkEnv, [])
+      if (checkEnv.errors.length > 0) {
+        console.error("Compile failed:")
+        // console.error(JSON.stringify(checkEnv.errors, null, 2))
+        checkEnv.errors.forEach(e => {
+          const { start, file } = e.node.location
+          if (file) {
+            console.error(file)
+          }
+          if (start) {
+            console.error(`${start.line}:${start.column} ${e.id}`)
+          } else {
+            console.error(`System: ${e.id}`)
+          }
+          if (e.details) {
+            console.error(e.details)
+          }
+          console.error("")
+        })
+      } else {
+        if (args.indexOf("--eval") > -1) {
+          const env: Environment = {
+            errors: [],
+            symbols: {},
+            location: {}
+          }
+          addSystemFunctions(env)
+          ast.eval(env)
         }
-        addSystemFunctions(env)
-        ast.eval(env)
       }
     } else {
       console.error(`File "${filePath}" does not exist.`)

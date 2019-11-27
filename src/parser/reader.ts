@@ -9,8 +9,10 @@ export class Reader {
   i: number
   line: number
   column: number
+  file: string
 
   constructor(file: string) {
+    this.file = file
     this.content = fs.readFileSync(file, { encoding: "UTF-8" })
     this.i = 0
     this.line = 1

@@ -17,6 +17,11 @@ export class ASTNode {
     return results[results.length - 1]
   }
 
+  check(env: Environment, args: ASTNode[] = []): ASTNode {
+    this.children.forEach(c => c.check(env, args))
+    return this
+  }
+
   getTypedValue(): string | number {
     throw new Error(`Casting not supported for ${this.type} node`)
   }

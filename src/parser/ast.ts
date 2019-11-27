@@ -54,7 +54,8 @@ export function parseASTElement(reader: Reader): ASTNode {
       reader.next()
       return new FNCallNode(children, {
         start: openPosition,
-        end: reader.position()
+        end: reader.position(),
+        file: reader.file
       })
     } else if (nextToken === `"`) {
       children.push(createValueNode(parseString, reader))
@@ -71,6 +72,7 @@ export function parseASTElement(reader: Reader): ASTNode {
   }
   return new ASTNode("block", children, {
     start: openPosition,
-    end: reader.position()
+    end: reader.position(),
+    file: reader.file
   })
 }
