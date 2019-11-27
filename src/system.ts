@@ -1,6 +1,7 @@
 import { Environment } from "./ast/environment"
 import { SystemFunctionNode, FunctionNode } from "./ast/function_node"
 import { ASTNode } from "./ast/ast_node"
+import { parseFile } from "."
 
 export function addSystemFunctions(env: Environment) {
   env.symbols.import = new SystemFunctionNode(
@@ -41,7 +42,8 @@ export function addSystemFunctions(env: Environment) {
             ))
         )
       } else {
-        throw new Error("Non-JS require not implemented yet")
+        const importedAst = parseFile(`${ns.join("/")}.simli`)
+        importedAst.eval(env, args)
       }
       return null
     }
