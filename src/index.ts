@@ -28,20 +28,18 @@ function main(args: string[]) {
         console.error("Compile failed:")
         // console.error(JSON.stringify(checkEnv.errors, null, 2))
         checkEnv.errors.forEach(e => {
+          console.error("")
           const { start, file } = e.node.location
-          if (file) {
-            console.error(file)
-          }
-          if (start) {
-            console.error(`${start.line}:${start.column} ${e.id}`)
+          if (start && file) {
+            console.error(`${file} ${start.line}:${start.column} ${e.id}`)
           } else {
-            console.error(`System: ${e.id}`)
+            console.error(`Unknown: ${e.id}`)
           }
           if (e.details) {
             console.error(e.details)
           }
-          console.error("")
         })
+        console.error("")
       } else {
         if (args.indexOf("--eval") > -1) {
           const env: Environment = {
