@@ -57,6 +57,17 @@ export function parseASTElement(reader: Reader): ASTNode {
         end: reader.position(),
         file: reader.file
       })
+    } else if (nextToken === "[") {
+      reader.next()
+      children.push(parseASTElement(reader))
+    } else if (nextToken === "]") {
+      open = false
+      reader.next()
+      return new ASTNode("array", children, {
+        start: openPosition,
+        end: reader.position(),
+        file: reader.file
+      })
     } else if (nextToken === `"`) {
       children.push(createValueNode(parseString, reader))
     } else {
