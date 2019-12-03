@@ -10,7 +10,9 @@ const whiteSpaces: Tokens = {
 
 const brackets: Tokens = {
   "(": true,
-  ")": true
+  ")": true,
+  "[": true,
+  "]": true
 }
 
 export function isWhitespace(c: string) {
