@@ -1,6 +1,7 @@
 import { ASTNode } from "./ast_node"
 import { PositionRange } from "./position"
 import { Environment, createError } from "./environment"
+import { UnidentifiedNode } from "../system"
 
 export class FNCallNode extends ASTNode {
   id: string
@@ -10,24 +11,42 @@ export class FNCallNode extends ASTNode {
     this.id = children[0].toString()
   }
 
-  eval(env: Environment, args: ASTNode[] = []): ASTNode | null {
+  eval(env: Environment, _: ASTNode[] = []): ASTNode | null {
     env.location = this.location
     return env.symbols[this.id].eval(env, this.children)
   }
 
   check(env: Environment, args: ASTNode[] = []): ASTNode {
-    this.children.slice(1).map(c => c.check(env, args))
     if (env.symbols[this.id]) {
-      const node = env.symbols[this.id].check(env, args)
-      const fnArgs = node.children[0].children
-      if (this.children.length !== fnArgs.length) {
-        env.errors.push(
-          createError(
-            this,
-            "wrongNumberArguments",
-            `${this.id}: ${this.children.length} arguments given but ${fnArgs.length}`
+      const callArgs = this.children
+      const node = env.symbols[this.id].check(env, callArgs)
+      const fnArgs = node.children[1].children
+      if (fnArgs[fnArgs.length - 1].type === "varargs") {
+        if (this.children.length < fnArgs.length - 1) {
+          env.errors.push(
+            createError(
+              this,
+              "wrongNumberArguments",
+              `${this.id}: At least ${fnArgs.length - 1} expected, ${
+                callArgs.length
+              } got`
+            )
           )
-        )
+        } else {
+          callArgs.map(c => c.check(env, args))
+        }
+      } else {
+        if (this.children.length !== fnArgs.length) {
+          env.errors.push(
+            createError(
+              this,
+              "wrongNumberArguments",
+              `${this.id}: ${fnArgs.length} expected, ${callArgs.length} got`
+            )
+          )
+        } else {
+          callArgs.map(c => c.check(env, args))
+        }
       }
     } else {
       env.errors.push(createError(this, "functionNotFound"))
@@ -36,23 +55,40 @@ export class FNCallNode extends ASTNode {
   }
 }
 
-export class SystemFunctionNode extends ASTNode {
-  fn: (env: Environment, args: ASTNode[]) => ASTNode | null
+export interface CheckParams {
+  node: ASTNode
+  env: Environment
+  args: ASTNode[]
+}
+
+export class SystemFunctionNode extends FunctionNode {
+  evalFunction: (env: Environment, args: ASTNode[]) => ASTNode | null
+  checkFunction: (params: CheckParams) => ASTNode
 
   constructor(
     args: ASTNode[],
-    fn: (env: Environment, args: ASTNode[]) => ASTNode | null
+    evalFunction: (env: Environment, args: ASTNode[]) => ASTNode | null,
+    checkFunction: (params: CheckParams) => ASTNode
   ) {
-    super("function", args, {})
-    this.fn = fn
+    super(
+      "function",
+      [new UnidentifiedNode(), new ASTNode("block", args, {})],
+      {}
+    )
+    this.evalFunction = evalFunction
+    this.checkFunction = checkFunction
   }
 
   eval(env: Environment, args: ASTNode[]): ASTNode | null {
-    return this.fn(env, args)
+    return this.evalFunction(env, args)
   }
 
   check(env: Environment, args: ASTNode[] = []): ASTNode {
-    return this
+    return this.checkFunction({
+      node: this,
+      env,
+      args
+    })
   }
 }
 
