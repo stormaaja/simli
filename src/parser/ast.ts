@@ -42,7 +42,7 @@ export function parseASTElement(reader: Reader): ASTNode {
   const openPosition = reader.position()
   while (reader.hasTokens()) {
     nextToken = reader.peek()
-    if (nextToken === "/" && reader.peekAfter() === "/") {
+    if (nextToken === ";") {
       parseComment(reader)
     } else if (isWhitespace(nextToken)) {
       reader.next()
